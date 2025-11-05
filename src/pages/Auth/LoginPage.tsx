@@ -39,8 +39,8 @@ const LoginPage = () => {
                // Simulate API call
                await new Promise(resolve => setTimeout(resolve, 1000));
 
-               // Navigate to vault unlock on successful login
-               navigate(ROUTES.UNLOCK_VAULT);
+               // Navigate to vault home for testing
+               navigate(ROUTES.VAULT_HOME);
           } catch (error) {
                console.error('Login error:', error);
           } finally {

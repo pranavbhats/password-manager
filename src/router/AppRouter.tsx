@@ -4,10 +4,10 @@ import { ROUTES } from '../constants';
 // Pages
 import SplashPage from '../pages/Splash';
 import { LoginPage, SignupPage } from '../pages/Auth';
+import VaultHomePage from '../pages/VaultHome/VaultHomePage';
 
 // Placeholder components for other routes
 const UnlockVaultPage = () => <div>Unlock Vault Page - Coming Soon</div>;
-const VaultHomePage = () => <div>Vault Home Page - Coming Soon</div>;
 const AddEditEntryPage = () => <div>Add/Edit Entry Page - Coming Soon</div>;
 const ViewEntryPage = () => <div>View Entry Page - Coming Soon</div>;
 const AnalysisPage = () => <div>Analysis Page - Coming Soon</div>;
