@@ -71,6 +71,7 @@ export interface PasswordEntryForm {
      notes?: string;
      category: string;
      tags: string[];
+     lastUsed?: string;
 }
 
 // Settings types
