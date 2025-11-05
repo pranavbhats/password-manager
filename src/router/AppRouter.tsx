@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '../constants';
+import RouteTransition from '../components/templates/RouteTransition';
 
 // Pages
 import SplashPage from '../pages/Splash';
@@ -16,28 +17,33 @@ const SettingsPage = () => <div>Settings Page - Coming Soon</div>;
 const AppRouter = () => {
      return (
           <Router>
-               <Routes>
-                    {/* Splash Screen - Initial route */}
-                    <Route path={ROUTES.SPLASH} element={<SplashPage />} />
+               <RouteTransition
+                    duration={1200}
+                    skipPaths={['/']}
+               >
+                    <Routes>
+                         {/* Splash Screen - Initial route */}
+                         <Route path={ROUTES.SPLASH} element={<SplashPage />} />
 
-                    {/* Authentication Routes */}
-                    <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                    <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+                         {/* Authentication Routes */}
+                         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+                         <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
 
-                    {/* Vault Routes */}
-                    <Route path={ROUTES.UNLOCK_VAULT} element={<UnlockVaultPage />} />
-                    <Route path={ROUTES.VAULT_HOME} element={<VaultHomePage />} />
-                    <Route path={ROUTES.ADD_ENTRY} element={<AddEditEntryPage />} />
-                    <Route path={ROUTES.EDIT_ENTRY} element={<AddEditEntryPage />} />
-                    <Route path={ROUTES.VIEW_ENTRY} element={<ViewEntryPage />} />
+                         {/* Vault Routes */}
+                         <Route path={ROUTES.UNLOCK_VAULT} element={<UnlockVaultPage />} />
+                         <Route path={ROUTES.VAULT_HOME} element={<VaultHomePage />} />
+                         <Route path={ROUTES.ADD_ENTRY} element={<AddEditEntryPage />} />
+                         <Route path={ROUTES.EDIT_ENTRY} element={<AddEditEntryPage />} />
+                         <Route path={ROUTES.VIEW_ENTRY} element={<ViewEntryPage />} />
 
-                    {/* App Features */}
-                    <Route path={ROUTES.ANALYSIS} element={<AnalysisPage />} />
-                    <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+                         {/* App Features */}
+                         <Route path={ROUTES.ANALYSIS} element={<AnalysisPage />} />
+                         <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
 
-                    {/* Catch all route - redirect to splash */}
-                    <Route path="*" element={<Navigate to={ROUTES.SPLASH} replace />} />
-               </Routes>
+                         {/* Catch all route - redirect to splash */}
+                         <Route path="*" element={<Navigate to={ROUTES.SPLASH} replace />} />
+                    </Routes>
+               </RouteTransition>
           </Router>
      );
 };
