@@ -1,6 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/templates/AppLayout';
+import PasswordCard from '../../components/molecules/PasswordCard';
+import Button from '../../components/atoms/Button';
+import { ROUTES } from '../../constants';
 
 const VaultHomePage = () => {
+     const navigate = useNavigate();
+
+     const handleAddPassword = () => {
+          navigate(ROUTES.ADD_ENTRY);
+     };
      return (
           <AppLayout title="Your Vault">
                <div className="max-w-4xl mx-auto">
@@ -52,9 +61,12 @@ const VaultHomePage = () => {
                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                          </div>
-                         <button className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium">
+                         <Button
+                              variant="primary"
+                              onClick={handleAddPassword}
+                         >
                               Add Password
-                         </button>
+                         </Button>
                     </div>
 
                     {/* Recent Passwords */}
@@ -68,27 +80,14 @@ const VaultHomePage = () => {
                                    { name: 'GitHub', username: 'developer', lastUsed: '1 day ago' },
                                    { name: 'Netflix', username: 'user@email.com', lastUsed: '3 days ago' },
                               ].map((item, index) => (
-                                   <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                                        <div className="flex items-center justify-between">
-                                             <div className="flex items-center gap-3">
-                                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                       <span className="text-sm font-medium text-gray-600">
-                                                            {item.name.charAt(0)}
-                                                       </span>
-                                                  </div>
-                                                  <div>
-                                                       <p className="font-medium text-gray-900">{item.name}</p>
-                                                       <p className="text-sm text-gray-600">{item.username}</p>
-                                                  </div>
-                                             </div>
-                                             <div className="flex items-center gap-2">
-                                                  <span className="text-xs text-gray-500">{item.lastUsed}</span>
-                                                  <button className="p-2 text-gray-400 hover:text-gray-600">
-                                                       <span>⋯</span>
-                                                  </button>
-                                             </div>
-                                        </div>
-                                   </div>
+                                   <PasswordCard
+                                        key={index}
+                                        name={item.name}
+                                        username={item.username}
+                                        lastUsed={item.lastUsed}
+                                        onClick={() => console.log('Password clicked:', item.name)}
+                                        onMenuClick={() => console.log('Menu clicked:', item.name)}
+                                   />
                               ))}
                          </div>
                     </div>

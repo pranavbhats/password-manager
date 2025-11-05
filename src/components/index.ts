@@ -11,7 +11,7 @@ export { default as NavItem } from './atoms/NavItem';
 
 // Molecules
 // export { default as SearchBar } from './molecules/SearchBar';
-// export { default as PasswordCard } from './molecules/PasswordCard';
+export { default as PasswordCard } from './molecules/PasswordCard';
 // export { default as FormField } from './molecules/FormField';
 // export { default as NavigationItem } from './molecules/NavigationItem';
 // export { default as PasswordStrengthIndicator } from './molecules/PasswordStrengthIndicator';
@@ -20,6 +20,7 @@ export { default as AuthToggle } from './molecules/AuthToggle';
 export { default as RememberMe } from './molecules/RememberMe';
 export { default as TermsCheckbox } from './molecules/TermsCheckbox';
 export { default as SideNavHeader } from './molecules/SideNavHeader';
+export { default as TagChips } from './molecules/TagChips';
 
 // Organisms
 // export { default as Header } from './organisms/Header';
