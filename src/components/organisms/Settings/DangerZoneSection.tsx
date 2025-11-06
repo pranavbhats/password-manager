@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../atoms/Button';
+import Button from '../../atoms/Button';
 
 interface DangerZoneSectionProps {
      onLogout: () => Promise<void>;
@@ -10,11 +10,11 @@ interface DangerZoneSectionProps {
      };
 }
 
-const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({ 
-     onLogout, 
-     onFactoryReset, 
-     onDeleteAccount, 
-     isLoading 
+const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
+     onLogout,
+     onFactoryReset,
+     onDeleteAccount,
+     isLoading
 }) => {
      return (
           <div className="bg-white shadow rounded-lg border-red-200">

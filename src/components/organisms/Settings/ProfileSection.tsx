@@ -1,9 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { profileUpdateSchema, type ProfileUpdateFormData } from '../../schemas/settings';
-import Input from '../atoms/Input';
-import Button from '../atoms/Button';
+import { profileUpdateSchema, type ProfileUpdateFormData } from '../../../schemas/settings';
+import Input from '../../atoms/Input';
+import Button from '../../atoms/Button';
 
 interface ProfileSectionProps {
      user: {

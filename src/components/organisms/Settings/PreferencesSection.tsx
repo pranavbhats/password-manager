@@ -1,8 +1,8 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { preferencesSchema, type PreferencesFormData } from '../../schemas/settings';
-import Button from '../atoms/Button';
+import { preferencesSchema, type PreferencesFormData } from '../../../schemas/settings';
+import Button from '../../atoms/Button';
 
 interface PreferencesSectionProps {
      preferences: PreferencesFormData;
