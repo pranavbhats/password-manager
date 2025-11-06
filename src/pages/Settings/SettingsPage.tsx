@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import {
      selectUser,
@@ -15,6 +16,7 @@ import {
      addNotification
 } from '../../store/slices/uiSlice';
 import { authService } from '../../services/auth';
+import { ROUTES } from '../../constants';
 import {
      type ProfileUpdateFormData,
      type PasswordChangeFormData,
@@ -35,6 +37,7 @@ import FactoryResetModal from '../../components/molecules/SettingsModals/Factory
 
 const SettingsPage: React.FC = () => {
      const dispatch = useAppDispatch();
+     const navigate = useNavigate();
      const user = useAppSelector(selectUser);
      const preferences = useAppSelector(selectPreferences);
      const modals = useAppSelector(selectModals);
@@ -122,6 +125,8 @@ const SettingsPage: React.FC = () => {
           try {
                await authService.signOut();
                dispatch(logout());
+               // Navigate to login page after successful logout
+               navigate(ROUTES.LOGIN);
           } catch {
                dispatch(addNotification({
                     type: 'error',

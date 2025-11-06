@@ -44,4 +44,5 @@ export type { TabType } from './organisms/Settings/SettingsSidebar';
 export { default as AuthLayout } from './templates/AuthLayout';
 export { default as AppLayout } from './templates/AppLayout';
 export { default as RouteTransition } from './templates/RouteTransition';
+export { default as ProtectedRoute } from './templates/ProtectedRoute';
 // export { default as DashboardLayout } from './templates/DashboardLayout';

@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '../constants';
 import RouteTransition from '../components/templates/RouteTransition';
+import ProtectedRoute from '../components/templates/ProtectedRoute';
 import LoadingScreen from '../components/organisms/LoadingScreen';
 
 // Lazy load pages for better performance
@@ -44,20 +45,83 @@ const AppRouter = () => {
                               {/* Splash Screen - Initial route */}
                               <Route path={ROUTES.SPLASH} element={<SplashPage />} />
 
-                              {/* Authentication Routes */}
-                              <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-                              <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+                              {/* Authentication Routes - Only for non-authenticated users */}
+                              <Route
+                                   path={ROUTES.LOGIN}
+                                   element={
+                                        <ProtectedRoute requireAuth={false}>
+                                             <LoginPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.SIGNUP}
+                                   element={
+                                        <ProtectedRoute requireAuth={false}>
+                                             <SignupPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
 
-                              {/* Vault Routes */}
-                              <Route path={ROUTES.UNLOCK_VAULT} element={<UnlockVaultPage />} />
-                              <Route path={ROUTES.VAULT_HOME} element={<VaultHomePage />} />
-                              <Route path={ROUTES.ADD_ENTRY} element={<AddEditEntryPage />} />
-                              <Route path={ROUTES.EDIT_ENTRY} element={<AddEditEntryPage />} />
-                              <Route path={ROUTES.VIEW_ENTRY} element={<ViewEntryPage />} />
+                              {/* Protected Vault Routes - Require authentication */}
+                              <Route
+                                   path={ROUTES.UNLOCK_VAULT}
+                                   element={
+                                        <ProtectedRoute>
+                                             <UnlockVaultPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.VAULT_HOME}
+                                   element={
+                                        <ProtectedRoute>
+                                             <VaultHomePage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.ADD_ENTRY}
+                                   element={
+                                        <ProtectedRoute>
+                                             <AddEditEntryPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.EDIT_ENTRY}
+                                   element={
+                                        <ProtectedRoute>
+                                             <AddEditEntryPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.VIEW_ENTRY}
+                                   element={
+                                        <ProtectedRoute>
+                                             <ViewEntryPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
 
-                              {/* App Features */}
-                              <Route path={ROUTES.ANALYSIS} element={<AnalysisPage />} />
-                              <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+                              {/* Protected App Features - Require authentication */}
+                              <Route
+                                   path={ROUTES.ANALYSIS}
+                                   element={
+                                        <ProtectedRoute>
+                                             <AnalysisPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
+                              <Route
+                                   path={ROUTES.SETTINGS}
+                                   element={
+                                        <ProtectedRoute>
+                                             <SettingsPage />
+                                        </ProtectedRoute>
+                                   }
+                              />
 
                               {/* Catch all route - redirect to splash */}
                               <Route path="*" element={<Navigate to={ROUTES.SPLASH} replace />} />
