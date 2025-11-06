@@ -1,65 +1,69 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PasswordEntry } from '../../../types';
 
 interface PasswordCardProps {
      entry: PasswordEntry;
      onMenuClick?: () => void;
      onClick?: () => void;
+     onEdit?: (entry: PasswordEntry) => void;
+     onDelete?: (entry: PasswordEntry) => void;
 }
 
 const PasswordCard: React.FC<PasswordCardProps> = ({
      entry,
      onMenuClick,
-     onClick
+     onClick,
+     onEdit,
+     onDelete
 }) => {
      const [isExpanded, setIsExpanded] = useState(false);
      const [isMobile, setIsMobile] = useState(false);
+     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+     const mobileDropdownRef = useRef<HTMLDivElement>(null);
+     const desktopDropdownRef = useRef<HTMLDivElement>(null);
 
+     // Mobile detection with resize listener
      useEffect(() => {
-          const checkIsMobile = () => {
-               setIsMobile(window.innerWidth < 768);
-          };
-
-          // Check on mount
+          const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
           checkIsMobile();
-
-          // Add listener for window resize
           window.addEventListener('resize', checkIsMobile);
-
-          // Cleanup
           return () => window.removeEventListener('resize', checkIsMobile);
      }, []);
 
-     const handleCardClick = () => {
-          // On mobile, toggle expansion first, then call onClick
-          if (isMobile) {
-               setIsExpanded(!isExpanded);
+     // Close dropdown when clicking outside
+     useEffect(() => {
+          const handleClickOutside = (event: MouseEvent) => {
+               const target = event.target as Node;
+               const isOutsideMobile = mobileDropdownRef.current && !mobileDropdownRef.current.contains(target);
+               const isOutsideDesktop = desktopDropdownRef.current && !desktopDropdownRef.current.contains(target);
+
+               if (isOutsideMobile && isOutsideDesktop) {
+                    setIsDropdownOpen(false);
+               }
+          };
+
+          if (isDropdownOpen) {
+               document.addEventListener('mousedown', handleClickOutside);
+               return () => document.removeEventListener('mousedown', handleClickOutside);
           }
-          onClick?.();
-     };
+     }, [isDropdownOpen]);
+
+     // Utility functions
      const getStrengthColor = (strength: PasswordEntry['strength']) => {
-          switch (strength) {
-               case 'weak': return 'bg-red-100 text-red-700 border-red-200';
-               case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-               case 'strong': return 'bg-green-100 text-green-700 border-green-200';
-               case 'very-strong': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-               default: return 'bg-gray-100 text-gray-700 border-gray-200';
-          }
+          const colors = {
+               'weak': 'bg-red-100 text-red-700 border-red-200',
+               'medium': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+               'strong': 'bg-green-100 text-green-700 border-green-200',
+               'very-strong': 'bg-emerald-100 text-emerald-700 border-emerald-200'
+          };
+          return colors[strength] || 'bg-gray-100 text-gray-700 border-gray-200';
      };
 
      const getCategoryIcon = (category: string) => {
           const icons: Record<string, string> = {
-               'social': '👥',
-               'work': '💼',
-               'finance': '💳',
-               'shopping': '🛒',
-               'entertainment': '🎬',
-               'email': '📧',
-               'utilities': '⚡',
-               'health': '🏥',
-               'education': '🎓',
-               'travel': '✈️',
-               'other': '🔐'
+               'social': '👥', 'work': '💼', 'finance': '💳', 'shopping': '🛒',
+               'entertainment': '🎬', 'email': '📧', 'utilities': '⚡', 'health': '🏥',
+               'education': '🎓', 'travel': '✈️', 'other': '🔐'
           };
           return icons[category.toLowerCase()] || '🔐';
      };
@@ -77,6 +81,145 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
           return date.toLocaleDateString();
      };
 
+     // Event handlers
+     const handleCardClick = () => {
+          if (isMobile) setIsExpanded(!isExpanded);
+          onClick?.();
+     };
+
+     const handleMenuClick = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          setIsDropdownOpen(!isDropdownOpen);
+          onMenuClick?.();
+     };
+
+     const createClipboardHandler = (text: string, type: string) => async (e: React.MouseEvent) => {
+          e.stopPropagation();
+          try {
+               await navigator.clipboard.writeText(text);
+               console.log(`${type} copied to clipboard`);
+          } catch (err) {
+               console.error(`Failed to copy ${type.toLowerCase()}:`, err);
+          }
+          setIsDropdownOpen(false);
+     };
+
+     const handleCopyPassword = createClipboardHandler(entry.password, 'Password');
+     const handleCopyUsername = createClipboardHandler(entry.username, 'Username');
+
+     const handleEdit = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          onEdit?.(entry);
+          setIsDropdownOpen(false);
+     };
+
+     const handleDelete = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          onDelete?.(entry);
+          setIsDropdownOpen(false);
+     };
+
+     // Reusable components
+     const CategoryIcon = ({ size = 'lg', className = '' }: { size?: 'sm' | 'lg'; className?: string }) => (
+          <div className={`bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center shrink-0 border border-blue-200 ${size === 'sm' ? 'w-10 h-10 rounded-lg' : 'w-12 h-12 rounded-xl'
+               } ${className}`}>
+               <span className={size === 'sm' ? 'text-sm' : 'text-lg'}>
+                    {getCategoryIcon(entry.category)}
+               </span>
+          </div>
+     );
+
+     const StrengthBadge = ({ mobile = false }: { mobile?: boolean }) => (
+          <span className={`text-xs px-2 py-1 rounded-full border font-medium ${getStrengthColor(entry.strength)}`}>
+               {mobile && entry.strength === 'very-strong' ? 'strong' : entry.strength.replace('-', ' ')}
+          </span>
+     );
+
+     const TagsList = ({ mobile = false }: { mobile?: boolean }) => {
+          const maxTags = mobile ? 3 : 2;
+          const visibleTags = entry.tags.slice(0, maxTags);
+          const remainingCount = entry.tags.length - maxTags;
+
+          return (
+               <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
+                         {entry.category}
+                    </span>
+                    {visibleTags.map((tag, index) => (
+                         <span
+                              key={index}
+                              className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-200"
+                         >
+                              {tag}
+                         </span>
+                    ))}
+                    {remainingCount > 0 && (
+                         <span className="text-xs text-gray-400">
+                              +{remainingCount} more
+                         </span>
+                    )}
+               </div>
+          );
+     };
+
+     const DropdownMenu = ({ dropdownRef }: { dropdownRef: React.RefObject<HTMLDivElement | null> }) => (
+          <div className="relative" ref={dropdownRef}>
+               <button
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={handleMenuClick}
+                    aria-label="More options"
+               >
+                    <span className="text-lg">⋯</span>
+               </button>
+
+               {isDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                         <button
+                              onClick={handleEdit}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                         >
+                              <span className="text-blue-500">✏️</span>
+                              Edit Password
+                         </button>
+                         <button
+                              onClick={handleCopyPassword}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                         >
+                              <span className="text-green-500">🔑</span>
+                              Copy Password
+                         </button>
+                         <button
+                              onClick={handleCopyUsername}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                         >
+                              <span className="text-purple-500">👤</span>
+                              Copy Username
+                         </button>
+                         <div className="border-t border-gray-100 my-1"></div>
+                         <button
+                              onClick={handleDelete}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                         >
+                              <span className="text-red-500">🗑️</span>
+                              Delete
+                         </button>
+                    </div>
+               )}
+          </div>
+     );
+
+     const NotesSection = ({ mobile = false }: { mobile?: boolean }) => {
+          if (!entry.notes) return null;
+
+          return (
+               <div className={mobile ? "pt-2 border-t border-gray-100" : "mt-3 pt-3 border-t border-gray-100"}>
+                    <p className={`text-xs text-gray-500 ${mobile ? 'line-clamp-3' : 'line-clamp-2'}`}>
+                         📝 {entry.notes}
+                    </p>
+               </div>
+          );
+     };
+
      return (
           <div
                className="p-4 md:p-5 hover:bg-gray-50 transition-all duration-200 cursor-pointer border-b border-gray-100 last:border-b-0"
@@ -87,11 +230,7 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
                     <div className="flex items-center justify-between">
                          {/* Mobile: Icon + Basic Info */}
                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="w-10 h-10 bg-linear-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center shrink-0 border border-blue-200">
-                                   <span className="text-sm">
-                                        {getCategoryIcon(entry.category)}
-                                   </span>
-                              </div>
+                              <CategoryIcon size="sm" />
                               <div className="flex-1 min-w-0">
                                    <h3 className="font-medium text-gray-900 truncate text-sm">
                                         {entry.title}
@@ -104,9 +243,7 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
 
                          {/* Mobile: Strength + Expand Arrow */}
                          <div className="flex items-center gap-2 shrink-0">
-                              <span className={`text-xs px-2 py-1 rounded-full border font-medium ${getStrengthColor(entry.strength)}`}>
-                                   {entry.strength === 'very-strong' ? 'strong' : entry.strength}
-                              </span>
+                              <StrengthBadge mobile />
                               <div className="flex items-center">
                                    <span className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
                                         ▼
@@ -128,24 +265,7 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
                               )}
 
                               {/* Tags and Category */}
-                              <div className="flex items-center gap-2 flex-wrap">
-                                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
-                                        {entry.category}
-                                   </span>
-                                   {entry.tags.slice(0, 3).map((tag, index) => (
-                                        <span
-                                             key={index}
-                                             className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-200"
-                                        >
-                                             {tag}
-                                        </span>
-                                   ))}
-                                   {entry.tags.length > 3 && (
-                                        <span className="text-xs text-gray-400">
-                                             +{entry.tags.length - 3} more
-                                        </span>
-                                   )}
-                              </div>
+                              <TagsList mobile />
 
                               {/* Last Used */}
                               <div className="text-xs text-gray-500">
@@ -153,42 +273,22 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
                               </div>
 
                               {/* Notes */}
-                              {entry.notes && (
-                                   <div className="pt-2 border-t border-gray-100">
-                                        <p className="text-xs text-gray-500 line-clamp-3">
-                                             📝 {entry.notes}
-                                        </p>
-                                   </div>
-                              )}
+                              <NotesSection mobile />
 
                               {/* Mobile Menu Button */}
                               <div className="flex justify-end pt-2">
-                                   <button
-                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                        onClick={(e) => {
-                                             e.stopPropagation();
-                                             onMenuClick?.();
-                                        }}
-                                        aria-label="More options"
-                                   >
-                                        <span className="text-lg">⋯</span>
-                                   </button>
+                                   <DropdownMenu dropdownRef={mobileDropdownRef} />
                               </div>
                          </div>
                     )}
                </div>
 
-               {/* Desktop View (unchanged) */}
+               {/* Desktop View */}
                <div className="hidden md:block">
                     <div className="flex items-start justify-between gap-4">
                          {/* Left side - Main info */}
                          <div className="flex items-start gap-4 flex-1 min-w-0">
-                              {/* Icon */}
-                              <div className="w-12 h-12 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center shrink-0 border border-blue-200">
-                                   <span className="text-lg">
-                                        {getCategoryIcon(entry.category)}
-                                   </span>
-                              </div>
+                              <CategoryIcon />
 
                               {/* Main content */}
                               <div className="flex-1 min-w-0">
@@ -210,33 +310,13 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
                                    </p>
 
                                    {/* Tags and Category */}
-                                   <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
-                                             {entry.category}
-                                        </span>
-                                        {entry.tags.slice(0, 2).map((tag, index) => (
-                                             <span
-                                                  key={index}
-                                                  className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-200"
-                                             >
-                                                  {tag}
-                                             </span>
-                                        ))}
-                                        {entry.tags.length > 2 && (
-                                             <span className="text-xs text-gray-400">
-                                                  +{entry.tags.length - 2} more
-                                             </span>
-                                        )}
-                                   </div>
+                                   <TagsList />
                               </div>
                          </div>
 
                          {/* Right side - Meta info and actions */}
                          <div className="flex flex-col items-end gap-2 shrink-0">
-                              {/* Password strength */}
-                              <span className={`text-xs px-2 py-1 rounded-full border font-medium ${getStrengthColor(entry.strength)}`}>
-                                   {entry.strength.replace('-', ' ')}
-                              </span>
+                              <StrengthBadge />
 
                               {/* Last used */}
                               <span className="text-xs text-gray-500">
@@ -244,27 +324,12 @@ const PasswordCard: React.FC<PasswordCardProps> = ({
                               </span>
 
                               {/* Menu button */}
-                              <button
-                                   className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                   onClick={(e) => {
-                                        e.stopPropagation();
-                                        onMenuClick?.();
-                                   }}
-                                   aria-label="More options"
-                              >
-                                   <span className="text-lg">⋯</span>
-                              </button>
+                              <DropdownMenu dropdownRef={desktopDropdownRef} />
                          </div>
                     </div>
 
-                    {/* Desktop Notes preview (if available) */}
-                    {entry.notes && (
-                         <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-xs text-gray-500 line-clamp-2">
-                                   📝 {entry.notes}
-                              </p>
-                         </div>
-                    )}
+                    {/* Desktop Notes preview */}
+                    <NotesSection />
                </div>
           </div>
      );

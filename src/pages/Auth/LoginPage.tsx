@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ROUTES } from '../../constants';
+import { loginSchema, type LoginFormData } from '../../schemas/auth/authSchemas';
+import { authService } from '../../services/auth';
 
 // Composable components
 import AuthLayout from '../../components/templates/AuthLayout';
@@ -13,68 +17,69 @@ import AuthToggle from '../../components/molecules/AuthToggle';
 
 const LoginPage = () => {
      const navigate = useNavigate();
-     const [formData, setFormData] = useState({
-          email: '',
-          password: '',
-     });
      const [isLoading, setIsLoading] = useState(false);
      const [rememberMe, setRememberMe] = useState(false);
+     const [authError, setAuthError] = useState<string>('');
 
-     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
-          setFormData(prev => ({
-               ...prev,
-               [name]: value,
-          }));
-     };
+     const {
+          register,
+          handleSubmit,
+          formState: { errors, isValid },
+     } = useForm<LoginFormData>({
+          resolver: zodResolver(loginSchema),
+          mode: 'onChange',
+     });
 
-     const handleSubmit = async (e: React.FormEvent) => {
-          e.preventDefault();
+     const onSubmit = async (data: LoginFormData) => {
           setIsLoading(true);
+          setAuthError('');
 
           try {
-               // TODO: Implement Firebase authentication
-               console.log('Login attempt:', { ...formData, rememberMe });
+               await authService.signIn(data.email, data.password);
 
-               // Simulate API call
-               await new Promise(resolve => setTimeout(resolve, 1000));
-
-               // Navigate to vault home for testing
+               // Navigate to vault home after successful login
                navigate(ROUTES.VAULT_HOME);
           } catch (error) {
                console.error('Login error:', error);
+               setAuthError(
+                    error instanceof Error
+                         ? error.message
+                         : 'Failed to sign in. Please check your credentials.'
+               );
           } finally {
                setIsLoading(false);
           }
      };
-
-     const isFormValid = formData.email && formData.password;
 
      return (
           <AuthLayout
                title="Welcome back"
                subtitle="Sign in to access your vault"
           >
-               <AuthForm onSubmit={handleSubmit}>
+               {authError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                         <p className="text-sm text-red-600">{authError}</p>
+                    </div>
+               )}
+
+               <AuthForm onSubmit={handleSubmit(onSubmit)}>
                     <AuthForm.Fields>
                          <Input
-                              name="email"
+                              {...register('email')}
                               type="email"
                               label="Email address"
                               placeholder="Enter your email"
-                              value={formData.email}
-                              onChange={handleInputChange}
                               autoComplete="email"
+                              error={errors.email?.message}
                               required
                          />
 
                          <PasswordInput
-                              name="password"
+                              {...register('password')}
                               label="Password"
                               placeholder="Enter your password"
-                              value={formData.password}
-                              onChange={handleInputChange}
                               autoComplete="current-password"
+                              error={errors.password?.message}
                               required
                          />
                     </AuthForm.Fields>
@@ -98,7 +103,7 @@ const LoginPage = () => {
                               variant="primary"
                               size="lg"
                               isLoading={isLoading}
-                              disabled={!isFormValid}
+                              disabled={!isValid || isLoading}
                               className="w-full"
                          >
                               {isLoading ? 'Signing in...' : 'Sign in'}

@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ROUTES } from '../../constants';
+import { signupSchema, type SignupFormData } from '../../schemas/auth/authSchemas';
+import { authService } from '../../services/auth';
 
 // Composable components
 import AuthLayout from '../../components/templates/AuthLayout';
@@ -10,95 +14,112 @@ import PasswordInput from '../../components/molecules/PasswordInput';
 import Button from '../../components/atoms/Button';
 import TermsCheckbox from '../../components/molecules/TermsCheckbox';
 import AuthToggle from '../../components/molecules/AuthToggle';
+import PasswordStrength from '../../components/molecules/PasswordStrength';
 
 const SignupPage = () => {
      const navigate = useNavigate();
-     const [formData, setFormData] = useState({
-          email: '',
-          password: '',
-          confirmPassword: '',
-     });
      const [isLoading, setIsLoading] = useState(false);
-     const [agreeToTerms, setAgreeToTerms] = useState(false);
+     const [authError, setAuthError] = useState<string>('');
 
-     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
-          setFormData(prev => ({
-               ...prev,
-               [name]: value,
-          }));
-     };
+     const {
+          register,
+          handleSubmit,
+          watch,
+          control,
+          formState: { errors, isValid },
+     } = useForm<SignupFormData>({
+          resolver: zodResolver(signupSchema),
+          mode: 'onChange',
+     });
 
-     const handleSubmit = async (e: React.FormEvent) => {
-          e.preventDefault();
+     const watchedPassword = watch('password', '');
+
+     const onSubmit = async (data: SignupFormData) => {
           setIsLoading(true);
+          setAuthError('');
 
           try {
-               // TODO: Implement Firebase authentication
-               console.log('Signup attempt:', { ...formData, agreeToTerms });
-
-               // Simulate API call
-               await new Promise(resolve => setTimeout(resolve, 1000));
+               await authService.signUp(data.email, data.password);
 
                // Navigate to login after successful signup
                navigate(ROUTES.LOGIN);
           } catch (error) {
                console.error('Signup error:', error);
+               setAuthError(
+                    error instanceof Error
+                         ? error.message
+                         : 'Failed to create account. Please try again.'
+               );
           } finally {
                setIsLoading(false);
           }
      };
-
-     const isFormValid = formData.email && formData.password && formData.confirmPassword;
-     const passwordsMatch = formData.password === formData.confirmPassword;
-     const canSubmit = isFormValid && passwordsMatch && agreeToTerms;
 
      return (
           <AuthLayout
                title="Create your account"
                subtitle="Start securing your passwords today"
           >
-               <AuthForm onSubmit={handleSubmit}>
+               {authError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                         <p className="text-sm text-red-600">{authError}</p>
+                    </div>
+               )}
+
+               <AuthForm onSubmit={handleSubmit(onSubmit)}>
                     <AuthForm.Fields>
                          <Input
-                              name="email"
+                              {...register('email')}
                               type="email"
                               label="Email address"
                               placeholder="Enter your email"
-                              value={formData.email}
-                              onChange={handleInputChange}
                               autoComplete="email"
+                              error={errors.email?.message}
                               required
                          />
 
-                         <PasswordInput
-                              name="password"
-                              label="Password"
-                              placeholder="Create a strong password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              autoComplete="new-password"
-                              required
-                         />
+                         <div className="space-y-2">
+                              <PasswordInput
+                                   {...register('password')}
+                                   label="Password"
+                                   placeholder="Create a strong password"
+                                   autoComplete="new-password"
+                                   error={errors.password?.message}
+                                   required
+                              />
+                              <PasswordStrength
+                                   password={watchedPassword}
+                                   showStrength={watchedPassword.length > 0}
+                              />
+                         </div>
 
                          <PasswordInput
-                              name="confirmPassword"
+                              {...register('confirmPassword')}
                               label="Confirm Password"
                               placeholder="Confirm your password"
-                              value={formData.confirmPassword}
-                              onChange={handleInputChange}
                               autoComplete="new-password"
-                              error={formData.confirmPassword && !passwordsMatch ? 'Passwords do not match' : undefined}
+                              error={errors.confirmPassword?.message}
                               required
                          />
                     </AuthForm.Fields>
 
                     <AuthForm.Extras>
-                         <TermsCheckbox
-                              checked={agreeToTerms}
-                              onChange={setAgreeToTerms}
-                              required
-                         />
+                         <div className="space-y-2">
+                              <Controller
+                                   name="agreeToTerms"
+                                   control={control}
+                                   render={({ field }) => (
+                                        <TermsCheckbox
+                                             checked={field.value}
+                                             onChange={field.onChange}
+                                             required
+                                        />
+                                   )}
+                              />
+                              {errors.agreeToTerms && (
+                                   <p className="text-sm text-red-600">{errors.agreeToTerms.message}</p>
+                              )}
+                         </div>
                     </AuthForm.Extras>
 
                     <AuthForm.Actions>
@@ -107,7 +128,7 @@ const SignupPage = () => {
                               variant="primary"
                               size="lg"
                               isLoading={isLoading}
-                              disabled={!canSubmit}
+                              disabled={!isValid || isLoading}
                               className="w-full"
                          >
                               {isLoading ? 'Creating account...' : 'Create account'}
