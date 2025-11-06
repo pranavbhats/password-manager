@@ -43,7 +43,7 @@ const initialState: AuthState = {
      preferences: {
           theme: 'system',
           language: 'en',
-          autoLockTimeout: 15,
+          autoLockTimeout: 1,
           biometricEnabled: false,
           securityNotifications: true,
      },

@@ -68,7 +68,7 @@ export const preferencesSchema = z.object({
      language: z.string().min(2).max(5),
      autoLockTimeout: z
           .number()
-          .min(1, 'Auto-lock timeout must be at least 1 minute')
+          .min(0.1, 'Auto-lock timeout must be at least 0.1 minutes')
           .max(1440, 'Auto-lock timeout must not exceed 24 hours'),
      biometricEnabled: z.boolean(),
      securityNotifications: z.boolean(),

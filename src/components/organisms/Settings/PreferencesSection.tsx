@@ -54,9 +54,10 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ preferences, is
                                         <input
                                              {...field}
                                              type="number"
-                                             min="1"
+                                             min="0.1"
                                              max="1440"
-                                             onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                                             step="0.1"
+                                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
                                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
                                    )}
