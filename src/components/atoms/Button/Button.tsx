@@ -1,5 +1,5 @@
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-     variant?: 'primary' | 'secondary' | 'ghost';
+     variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
      size?: 'sm' | 'md' | 'lg';
      isLoading?: boolean;
      children: React.ReactNode;
@@ -19,7 +19,8 @@ const Button: React.FC<ButtonProps> = ({
      const variantClasses = {
           primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 hover:shadow-lg transform hover:scale-105 active:scale-95',
           secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-blue-500 hover:shadow-md',
-          ghost: 'text-blue-600 hover:text-blue-500'
+          ghost: 'text-blue-600 hover:text-blue-500',
+          danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 hover:shadow-lg transform hover:scale-105 active:scale-95'
      };
 
      const sizeClasses = {

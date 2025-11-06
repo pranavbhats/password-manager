@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ROUTES } from '../../constants';
 import { loginSchema, type LoginFormData } from '../../schemas/auth/authSchemas';
 import { authService } from '../../services/auth';
+import { useAppDispatch } from '../../store/hooks';
+import { loginSuccess, setError, setLoading } from '../../store/slices/authSlice';
 
 // Composable components
 import AuthLayout from '../../components/templates/AuthLayout';
@@ -17,6 +19,7 @@ import AuthToggle from '../../components/molecules/AuthToggle';
 
 const LoginPage = () => {
      const navigate = useNavigate();
+     const dispatch = useAppDispatch();
      const [isLoading, setIsLoading] = useState(false);
      const [rememberMe, setRememberMe] = useState(false);
      const [authError, setAuthError] = useState<string>('');
@@ -33,25 +36,28 @@ const LoginPage = () => {
      const onSubmit = async (data: LoginFormData) => {
           setIsLoading(true);
           setAuthError('');
+          dispatch(setLoading(true));
 
           try {
-               await authService.signIn(data.email, data.password);
+               const userCredential = await authService.signIn(data.email, data.password);
+
+               // Update Redux store with user data
+               dispatch(loginSuccess(userCredential.user));
 
                // Navigate to vault home after successful login
                navigate(ROUTES.VAULT_HOME);
           } catch (error) {
                console.error('Login error:', error);
-               setAuthError(
-                    error instanceof Error
-                         ? error.message
-                         : 'Failed to sign in. Please check your credentials.'
-               );
+               const errorMessage = error instanceof Error
+                    ? error.message
+                    : 'Failed to sign in. Please check your credentials.';
+               setAuthError(errorMessage);
+               dispatch(setError(errorMessage));
           } finally {
                setIsLoading(false);
+               dispatch(setLoading(false));
           }
-     };
-
-     return (
+     }; return (
           <AuthLayout
                title="Welcome back"
                subtitle="Sign in to access your vault"

@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import('../pages/Auth/LoginPage'));
 const SignupPage = lazy(() => import('../pages/Auth/SignupPage'));
 const VaultHomePage = lazy(() => import('../pages/VaultHome/VaultHomePage'));
 const AddEditEntryPage = lazy(() => import('../pages/AddEditEntry'));
+const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
 
 // Lazy load placeholder components
 const UnlockVaultPage = lazy(() => Promise.resolve({
@@ -20,9 +21,6 @@ const ViewEntryPage = lazy(() => Promise.resolve({
 }));
 const AnalysisPage = lazy(() => Promise.resolve({
      default: () => <div>Analysis Page - Coming Soon</div>
-}));
-const SettingsPage = lazy(() => Promise.resolve({
-     default: () => <div>Settings Page - Coming Soon</div>
 }));
 
 const AppRouter = () => {

@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ROUTES } from '../../constants';
 import { signupSchema, type SignupFormData } from '../../schemas/auth/authSchemas';
 import { authService } from '../../services/auth';
+import { useAppDispatch } from '../../store/hooks';
+import { loginSuccess, setError, setLoading } from '../../store/slices/authSlice';
 
 // Composable components
 import AuthLayout from '../../components/templates/AuthLayout';
@@ -18,6 +20,7 @@ import PasswordStrength from '../../components/molecules/PasswordStrength';
 
 const SignupPage = () => {
      const navigate = useNavigate();
+     const dispatch = useAppDispatch();
      const [isLoading, setIsLoading] = useState(false);
      const [authError, setAuthError] = useState<string>('');
 
@@ -37,25 +40,28 @@ const SignupPage = () => {
      const onSubmit = async (data: SignupFormData) => {
           setIsLoading(true);
           setAuthError('');
+          dispatch(setLoading(true));
 
           try {
-               await authService.signUp(data.email, data.password);
+               const userCredential = await authService.signUp(data.email, data.password);
 
-               // Navigate to login after successful signup
-               navigate(ROUTES.LOGIN);
+               // Update Redux store with user data
+               dispatch(loginSuccess(userCredential.user));
+
+               // Navigate to vault home after successful signup  
+               navigate(ROUTES.VAULT_HOME);
           } catch (error) {
                console.error('Signup error:', error);
-               setAuthError(
-                    error instanceof Error
-                         ? error.message
-                         : 'Failed to create account. Please try again.'
-               );
+               const errorMessage = error instanceof Error
+                    ? error.message
+                    : 'Failed to create account. Please try again.';
+               setAuthError(errorMessage);
+               dispatch(setError(errorMessage));
           } finally {
                setIsLoading(false);
+               dispatch(setLoading(false));
           }
-     };
-
-     return (
+     }; return (
           <AuthLayout
                title="Create your account"
                subtitle="Start securing your passwords today"

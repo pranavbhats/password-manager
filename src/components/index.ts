@@ -21,6 +21,9 @@ export { default as RememberMe } from './molecules/RememberMe';
 export { default as TermsCheckbox } from './molecules/TermsCheckbox';
 export { default as SideNavHeader } from './molecules/SideNavHeader';
 export { default as TagChips } from './molecules/TagChips';
+export { default as ChangePasswordModal } from './molecules/SettingsModals/ChangePasswordModal';
+export { default as DeleteAccountModal } from './molecules/SettingsModals/DeleteAccountModal';
+export { default as FactoryResetModal } from './molecules/SettingsModals/FactoryResetModal';
 
 // Organisms
 // export { default as Header } from './organisms/Header';
@@ -30,6 +33,12 @@ export { default as TagChips } from './molecules/TagChips';
 export { default as AuthForm } from './organisms/AuthForm/AuthForm';
 export { default as SideNav } from './organisms/SideNav';
 export { default as LoadingScreen } from './organisms/LoadingScreen';
+export { default as ProfileSection } from './organisms/Settings/ProfileSection';
+export { default as SecuritySection } from './organisms/Settings/SecuritySection';
+export { default as PreferencesSection } from './organisms/Settings/PreferencesSection';
+export { default as DangerZoneSection } from './organisms/Settings/DangerZoneSection';
+export { default as SettingsSidebar } from './organisms/Settings/SettingsSidebar';
+export type { TabType } from './organisms/Settings/SettingsSidebar';
 
 // Templates
 export { default as AuthLayout } from './templates/AuthLayout';

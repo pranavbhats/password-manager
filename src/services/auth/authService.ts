@@ -3,12 +3,15 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
-  updatePassword
+  updatePassword,
+  updateProfile as firebaseUpdateProfile,
+  updateEmail as firebaseUpdateEmail,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from 'firebase/auth';
 import type { User, UserCredential } from 'firebase/auth';
-import { auth } from '../../config/firebase';
-
-// Authentication service functions
+import { auth } from '../../config/firebase';// Authentication service functions
 export const authService = {
   // Sign up with email and password
   async signUp(email: string, password: string): Promise<UserCredential> {
@@ -53,11 +56,55 @@ export const authService = {
   },
 
   // Update user password
-  async updatePassword(user: User, newPassword: string): Promise<void> {
+  async updatePassword(newPassword: string): Promise<void> {
     try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('No authenticated user');
       await updatePassword(user, newPassword);
     } catch (error) {
       console.error('Error updating password:', error);
+      throw error;
+    }
+  },
+
+  // Update user profile
+  async updateProfile(displayName: string): Promise<void> {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('No authenticated user');
+      await firebaseUpdateProfile(user, { displayName });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
+  // Update user email
+  async updateEmail(newEmail: string): Promise<void> {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('No authenticated user');
+      await firebaseUpdateEmail(user, newEmail);
+    } catch (error) {
+      console.error('Error updating email:', error);
+      throw error;
+    }
+  },
+
+  // Delete user account
+  async deleteAccount(currentPassword: string): Promise<void> {
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.email) throw new Error('No authenticated user');
+
+      // Re-authenticate user before deleting account
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Delete the user account
+      await deleteUser(user);
+    } catch (error) {
+      console.error('Error deleting account:', error);
       throw error;
     }
   },
