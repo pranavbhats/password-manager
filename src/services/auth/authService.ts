@@ -38,6 +38,10 @@ export const authService = {
   // Sign out
   async signOut(): Promise<void> {
     try {
+      // Clear any cached data/tokens before signing out
+      localStorage.removeItem('vaultKey');
+      sessionStorage.clear();
+
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);

@@ -1,5 +1,8 @@
 // Custom hooks exports
 
+export { useAutoLogout } from './useAutoLogout';
+export { useRouteTransition } from './useRouteTransition';
+
 // export { default as useAuth } from './useAuth';
 // export { default as useVault } from './useVault';
 // export { default as usePasswordGenerator } from './usePasswordGenerator';

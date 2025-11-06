@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../config/firebase';
 import { useAppDispatch } from '../../../store';
 import { setInitialized, loginSuccess, logout } from '../../../store/slices/authSlice';
+import InactivityManager from '../InactivityManager';
 
 interface AuthInitializerProps {
      children: React.ReactNode;
@@ -34,7 +35,12 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
           return () => unsubscribe();
      }, [dispatch]);
 
-     return <>{children}</>;
+     return (
+          <>
+               {children}
+               <InactivityManager />
+          </>
+     );
 };
 
 export default AuthInitializer;

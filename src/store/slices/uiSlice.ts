@@ -11,6 +11,7 @@ export interface UIState {
           deleteAccount: boolean;
           changePassword: boolean;
           factoryReset: boolean;
+          inactivityWarning: boolean;
      };
 }
 
@@ -36,6 +37,7 @@ const initialState: UIState = {
           deleteAccount: false,
           changePassword: false,
           factoryReset: false,
+          inactivityWarning: false,
      },
 };
 
